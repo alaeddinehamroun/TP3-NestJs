@@ -4,9 +4,10 @@ import { PremierModule } from './premier/premier.module';
 import { TodoModule } from './todo/todo.module';
 import { ConfigModule } from '@nestjs/config';
 import { devConfig } from './config/dev.config';
-import { prodConfig } from "./config/prod.config";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { TodoEntity } from "./todo/Entity/todo.entity";
+import { prodConfig } from './config/prod.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CvsModule } from './cvs/cvs.module';
+import { CvsModule } from './cvs/cvs.module';
 
 @Module({
   imports: [
@@ -27,8 +28,9 @@ import { TodoEntity } from "./todo/Entity/todo.entity";
       synchronize: true,
       debug: true,
     }),
+    CvsModule,
   ],
   controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

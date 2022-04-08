@@ -9,7 +9,7 @@ import {
   Req
 } from "@nestjs/common";
 import { Todo } from './Model/todo.model';
-import { Request } from 'express';
+import { query, Request } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { TodoService } from './todo.service';
 import { TodoEntity } from './Entity/todo.entity';
@@ -24,8 +24,8 @@ import { SearchTodoDto } from "./dto/search-todo.dto";
 export class TodoDBController {
   constructor(private todoService: TodoService) {}
   @Get()
-  getTodos(@Query() searchTodoDto: SearchTodoDto): Promise<TodoEntity[]> {
-    return this.todoService.findAll(searchTodoDto);
+  getTodos(@Query() searchTodoDto: SearchTodoDto, take: number, skip: number): Promise<TodoEntity[]> {
+    return this.todoService.findAll(searchTodoDto, take, skip);
   }
 
   @Post()
@@ -54,5 +54,10 @@ export class TodoDBController {
   @Get('version')
   version() {
     return '2';
+  }
+
+  @Get('/stats')
+  getStats(@Query() dateDebut: Date, dateFin: Date){
+    return this.todoService.getStats(dateDebut, dateFin);
   }
 }

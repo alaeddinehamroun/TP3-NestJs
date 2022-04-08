@@ -9,10 +9,11 @@ import { SearchTodoDto } from './dto/search-todo.dto';
 
 @Injectable()
 export class TodoService {
+
   constructor(
     @InjectRepository(TodoEntity)
     private todoRepository: Repository<TodoEntity>,
-  ) {}
+  ) { }
   addTodo(todo: Partial<TodoEntity>): Promise<TodoEntity> {
     return this.todoRepository.save(todo);
   }
@@ -52,18 +53,31 @@ export class TodoService {
     throw new NotFoundException(`Le todo d'id ${id} n'existe pas `);
   }
 
-  findAll(searchTodoDto: SearchTodoDto): Promise<TodoEntity[]> {
-    const criterias = [];
-    if (searchTodoDto.status) {
-      criterias.push({ status: searchTodoDto.status });
+  findAll(searchTodoDto: SearchTodoDto, t: number, s: number): Promise<TodoEntity[]> {
+    const take = t || 0;
+    const skip = s || 0;
+    const queryBuilder = this.todoRepository.createQueryBuilder();
+    if (searchTodoDto.status && searchTodoDto.criteria) {
+      return queryBuilder.where("name LIKE :criteria", { criteria: '%' + searchTodoDto.criteria + '%' }).orWhere("description LIKE :criteria", { criteria: '%' + searchTodoDto.criteria + '%' }).andWhere("status = :status", { status: searchTodoDto.status }).take(take).skip(skip).getMany();
     }
     if (searchTodoDto.criteria) {
-      criterias.push({ name: Like(`%${searchTodoDto.criteria}%`) });
-      criterias.push({ description: Like(`%${searchTodoDto.criteria}%`) });
+      return queryBuilder.where("name LIKE :criteria", { criteria: '%' + searchTodoDto.criteria + '%' }).orWhere("description LIKE :criteria", { criteria: '%' + searchTodoDto.criteria + '%' }).take(take).skip(skip).getMany();
     }
-    if (criterias.length) {
-      return this.todoRepository.find({ withDeleted: true, where: criterias });
+    if (searchTodoDto.status) {
+      return queryBuilder.where("status = :status", { status: searchTodoDto.status }).take(take).skip(skip).getMany();
     }
-    return this.todoRepository.find({ withDeleted: true});
+  }
+
+
+  getStats(dateDebut: Date, dateFin: Date) {
+    const queryBuilder = this.todoRepository.createQueryBuilder();
+    console.log(dateDebut);
+    console.log(dateFin);
+    if (dateDebut && dateFin) {
+      return queryBuilder.select("status, count(createdAt) as count").where("createdAt BETWEEN :dateDebut AND :dateFin", { dateDebut: dateDebut, dateFin: dateFin }).groupBy("status").getRawMany();
+
+    }
+    return queryBuilder.select("status, count(createdAt) as count").groupBy("status").getRawMany();
+
   }
 }

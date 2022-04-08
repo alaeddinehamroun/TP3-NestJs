@@ -7,5 +7,6 @@ export class AddTodoDto {
   name: string;
   @IsNotEmpty()
   @MinLength(10)
+  
   description: string;
 }

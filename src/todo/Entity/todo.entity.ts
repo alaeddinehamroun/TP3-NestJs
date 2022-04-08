@@ -10,7 +10,6 @@ export class TodoEntity extends TiemstampEntity {
   name: string;
   @Column({})
   description: string;
-
   @Column({
     type: 'enum',
     enum: TodoStatusEnum,
